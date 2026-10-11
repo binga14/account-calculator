@@ -36,7 +36,7 @@ function render(){
  const margin=100-state.productPct-state.adPct-state.toolsPct-state.gatewayPct;
  $('roasDisplay').textContent=state.adPct>0?(100/state.adPct).toFixed(2)+'×':'—';
  $('marginDisplay').textContent=pct(margin);
- $('withdrawPctDisplay').textContent=pct(Math.max(0,margin-state.reinvestPct));
+ $('profitPctDisplay').textContent=pct(Math.max(0,margin-state.reinvestPct));
  const validation=validateSettings(state);
  $('alert').textContent=validation.join(' ');
  $('alert').hidden=validation.length===0;
@@ -116,3 +116,10 @@ $('nextWeek').addEventListener('click',()=>{state.selectedWeek=Math.min(state.ho
 $('resetBtn').addEventListener('click',()=>{state={...DEFAULTS};sync();render();});
 $('downloadBtn').addEventListener('click',()=>exportCSV('weekly'));
 $('downloadDailyBtn').addEventListener('click',()=>exportCSV('daily'));
+// Recalculate the read-only profit percentage while cost assumptions are being edited.
+for(const key of ['productPct','adPct','toolsPct','gatewayPct','reinvestPct']){
+ $(key).addEventListener('input',e=>{
+  state[key]=e.target.value.trim()===''?NaN:Number(e.target.value);
+  render();
+ });
+}
