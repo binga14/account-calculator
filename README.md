@@ -77,3 +77,17 @@ With a 5-day payout delay, money from Day 1 can be reused on Day 6. This affects
 This is a **cash-flow capacity scenario, not a sales forecast**. It assumes immediate conversion at the given ROAS, proportional product/advertising spend, constant margins, and automatic daily pacing of spend. Payment holds, ad learning, demand limits, refunds, taxes, supplier invoice delays, chargebacks, currency conversion costs, and credit terms are not simulated. The 4% overhead is treated as a variable cost **paid upon settlement**; actual annual or fixed overhead needs separate modeling. A bank payout delay may differ by transaction, merchant, bank and weekends.
 
 Source: [binga14/account-calculator](https://github.com/binga14/account-calculator).
+
+## Calendar-month profit withdrawn
+
+Choose a **Business start month & year** in the sidebar (the model's Day 1 is the **first day** of that calendar month). The dashboard's **View month & year** selector lets you inspect the projected actual cash withdrawn in that month. It is **not monthly recurring revenue (MRR)** and is **not** a 4-week or 4.33-week conversion.
+
+```text
+Monthly profit withdrawn = SUM(daily profit withdrawn on days falling within the selected calendar month)
+```
+
+The calendar calculation reads the existing simulated **settled daily payout ledger**, rather than recalculating profit from weekly revenue. For example, if a sale was made on October 31 and its payout delay is seven days, the resulting profit withdrawal occurs on **November 7** and is counted in November's monthly total. The report also displays sales generated in that month, net payouts received, and settled profit retained for working capital.
+
+The month dropdown only allows months within the selected forecast horizon. If the projection ends before the end of a calendar month, the final month's figure is labelled **partial** with the number of days covered. Calendar dates use UTC internally to avoid DST/time-zone rollover errors. This affects date labels and grouping, **not the underlying payout delay or daily cash model**.
+
+Run the included `calendar.test.mjs` with `node --test` to test month-end payout assignment, leap-year February and partial months.
