@@ -1,12 +1,15 @@
 import { DEFAULTS, simulate, validateSettings } from './model.mjs';
+import { parseMonth, summarizeCalendarMonths } from './calendar.mjs';
 const $=id=>document.getElementById(id);
 const INPUTS=['initialCapital','productPct','adPct','toolsPct','gatewayPct','reinvestPct','bufferPct','cashCycleDays','horizon','contributionAmount','firstContributionWeek','contributionEveryWeeks'];
-let state={...DEFAULTS},currentRows=[],currentDaily=[];
+const today=new Date();
+const defaultStartMonth=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0');
+let state={...DEFAULTS,startMonth:defaultStartMonth,viewMonth:defaultStartMonth},currentRows=[],currentDaily=[];
 const money=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n);
 const compact=n=>new Intl.NumberFormat('en-US',{notation:'compact',maximumFractionDigits:1}).format(n);
 const pct=n=>n.toFixed(1)+'%';
-try{const saved=JSON.parse(localStorage.getItem('binga-ecom-forecast-v1'));if(saved&&typeof saved==='object'){for(const key of INPUTS)if(Number.isFinite(saved[key]))state[key]=saved[key];if(typeof saved.contributionsEnabled==='boolean')state.contributionsEnabled=saved.contributionsEnabled;if(Number.isFinite(saved.selectedWeek))state.selectedWeek=saved.selectedWeek;}}catch{}
-function sync(){for(const key of INPUTS)$(key).value=state[key];$('contributionsEnabled').checked=state.contributionsEnabled;$('selectedWeek').value=state.selectedWeek;toggleFields();}
+try{const saved=JSON.parse(localStorage.getItem('binga-ecom-forecast-v1'));if(saved&&typeof saved==='object'){for(const key of INPUTS)if(Number.isFinite(saved[key]))state[key]=saved[key];if(typeof saved.contributionsEnabled==='boolean')state.contributionsEnabled=saved.contributionsEnabled;if(Number.isFinite(saved.selectedWeek))state.selectedWeek=saved.selectedWeek;if(typeof saved.startMonth==='string'){try{parseMonth(saved.startMonth);state.startMonth=saved.startMonth;}catch{}}if(typeof saved.viewMonth==='string'){try{parseMonth(saved.viewMonth);state.viewMonth=saved.viewMonth;}catch{}}}}catch{}
+function sync(){for(const key of INPUTS)$(key).value=state[key];$('startMonth').value=state.startMonth;$('contributionsEnabled').checked=state.contributionsEnabled;$('selectedWeek').value=state.selectedWeek;toggleFields();}
 function toggleFields(){$('contributionFields').style.opacity=state.contributionsEnabled?'1':'.45';$('contributionFields').querySelectorAll('input').forEach(e=>e.disabled=!state.contributionsEnabled);}
 function chart(rows,base){
  const root=$('chart'),W=1000,H=260,L=76,R=14,T=18,B=18,PW=W-L-R,PH=H-T-B;
@@ -49,6 +52,19 @@ function render(){
  $('chartEndWeek').textContent='WEEK '+state.horizon;
  const result=simulate(state);
  currentRows=result.weeks;currentDaily=result.days;
+ const months=summarizeCalendarMonths(currentDaily,state.startMonth);
+ if(!months.some(m=>m.month===state.viewMonth)){
+   state.viewMonth=state.viewMonth<months[0].month?months[0].month:months[months.length-1].month;
+ }
+ $('viewMonth').innerHTML=months.map(m=>'<option value="'+m.month+'">'+m.label+(m.partial?' · partial':'')+'</option>').join('');
+ $('viewMonth').value=state.viewMonth;
+ const selectedMonth=months.find(m=>m.month===state.viewMonth);
+ $('monthlyWithdrawn').textContent=money(selectedMonth.profitWithdrawn);
+ $('monthlySales').textContent=money(selectedMonth.grossSales);
+ $('monthlyPayouts').textContent=money(selectedMonth.payoutsReceived);
+ $('monthlyReinvested').textContent=money(selectedMonth.workingCapitalReinvested);
+ $('monthlyCoverage').textContent=selectedMonth.label+' · '+selectedMonth.daysCovered+'/'+selectedMonth.daysInMonth+' calendar days';
+ $('monthlyPartialNotice').hidden=!selectedMonth.partial;
  const baseline=simulate({...state,contributionsEnabled:false},false).weeks;
  const r=currentRows[state.selectedWeek-1],one=currentRows[0].revenue;
  for(const [id,val] of Object.entries({
@@ -109,11 +125,25 @@ for(const key of INPUTS)$(key).addEventListener('change',e=>{
  if(key==='horizon'&&Number.isFinite(value))state.selectedWeek=Math.min(value,state.selectedWeek);
  render();
 });
+$('startMonth').addEventListener('change',e=>{
+  try{
+    parseMonth(e.target.value);
+    state.startMonth=e.target.value;
+    state.viewMonth=state.startMonth;
+    render();
+  }catch{
+    e.target.value=state.startMonth;
+  }
+});
+$('viewMonth').addEventListener('change',e=>{
+  state.viewMonth=e.target.value;
+  render();
+});
 $('contributionsEnabled').addEventListener('change',e=>{state.contributionsEnabled=e.target.checked;toggleFields();render();});
 $('selectedWeek').addEventListener('change',e=>{if(Number.isFinite(Number(e.target.value)))state.selectedWeek=Number(e.target.value);render();});
 $('prevWeek').addEventListener('click',()=>{state.selectedWeek=Math.max(1,state.selectedWeek-1);render();});
 $('nextWeek').addEventListener('click',()=>{state.selectedWeek=Math.min(state.horizon,state.selectedWeek+1);render();});
-$('resetBtn').addEventListener('click',()=>{state={...DEFAULTS};sync();render();});
+$('resetBtn').addEventListener('click',()=>{state={...DEFAULTS,startMonth:defaultStartMonth,viewMonth:defaultStartMonth};sync();render();});
 $('downloadBtn').addEventListener('click',()=>exportCSV('weekly'));
 $('downloadDailyBtn').addEventListener('click',()=>exportCSV('daily'));
 // Recalculate the read-only profit percentage while cost assumptions are being edited.
