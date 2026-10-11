@@ -51,3 +51,15 @@ export function summarizeCalendarMonths(days, startMonth) {
   for (const row of summaries.values()) row.partial = row.daysCovered < row.daysInMonth;
   return [...summaries.values()];
 }
+
+export function getWeekDateRange(startMonth,week){
+ const {year,monthNumber}=parseMonth(startMonth);
+ if(!Number.isInteger(week)||week<1||week>260)throw new Error('Week must be between 1 and 260.');
+ const begin=Date.UTC(year,monthNumber-1,1)+(week-1)*7*86400000;
+ const format=milliseconds=>{
+  const d=new Date(milliseconds);
+  return [String(d.getUTCDate()).padStart(2,'0'),String(d.getUTCMonth()+1).padStart(2,'0'),String(d.getUTCFullYear()%100).padStart(2,'0')].join('.');
+ };
+ const start=format(begin),end=format(begin+6*86400000);
+ return {start,end,label:start+' – '+end};
+}
