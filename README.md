@@ -78,6 +78,10 @@ This is a **cash-flow capacity scenario, not a sales forecast**. It assumes imme
 
 Source: [binga14/account-calculator](https://github.com/binga14/account-calculator).
 
+## Inspect week dates
+
+The date range displayed below **Inspect week** comes from the first day of the selected **Business start month & year**. Each forecast week is exactly seven consecutive calendar days, starting at Day 1 of the simulation (not necessarily a Monday). Week 1 for October 2026 is `01.10.26 – 07.10.26`; Week 36 is `03.06.27 – 09.06.27`. Changing the selected week or start month updates this read-only range. All dates are computed using UTC to avoid daylight-saving offset errors.
+
 ## Calendar-month profit withdrawn
 
 Choose a **Business start month & year** in the sidebar (the model's Day 1 is the **first day** of that calendar month). The dashboard's **View month & year** selector lets you inspect the projected actual cash withdrawn in that month. It is **not monthly recurring revenue (MRR)** and is **not** a 4-week or 4.33-week conversion.
