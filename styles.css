@@ -11,3 +11,8 @@
 footer{font-size:10px;letter-spacing:1.7px;color:#91a9a8;padding:6px 0}
 footer span{margin:0 6px;color:#1a9a80}
 @media(max-width:650px){.header-actions{justify-content:flex-start}.main-header{flex-wrap:wrap}.header-actions .outline-btn{font-size:11px}}
+
+/* Automatically computed profit percentage; display only. */
+.economics-inline .computed-profit{border:1px solid rgba(123,230,201,.62);background:rgba(32,110,106,.48)}
+.economics-inline .auto-label{display:inline-block;margin-left:4px;color:#b7f2e2;font-size:9px;letter-spacing:.7px;font-weight:800}
+.profit-note{font-size:11px;line-height:1.5;color:#a9cecc;margin:-5px 0 18px}
