@@ -1,5 +1,5 @@
 import { DEFAULTS, simulate, validateSettings } from './model.mjs';
-import { parseMonth, summarizeCalendarMonths } from './calendar.mjs';
+import { parseMonth, summarizeCalendarMonths, getWeekDateRange } from './calendar.mjs';
 const $=id=>document.getElementById(id);
 const INPUTS=['initialCapital','productPct','adPct','toolsPct','gatewayPct','reinvestPct','bufferPct','cashCycleDays','horizon','contributionAmount','firstContributionWeek','contributionEveryWeeks'];
 const today=new Date();
@@ -49,6 +49,7 @@ function render(){
  state.selectedWeek=Math.max(1,Math.min(state.horizon,Math.round(state.selectedWeek)));
  $('selectedWeek').max=state.horizon;
  $('selectedWeek').value=state.selectedWeek;
+ $('weekDateRange').textContent=getWeekDateRange(state.startMonth,state.selectedWeek).label;
  $('chartEndWeek').textContent='WEEK '+state.horizon;
  const result=simulate(state);
  currentRows=result.weeks;currentDaily=result.days;
