@@ -16,3 +16,26 @@ footer span{margin:0 6px;color:#1a9a80}
 .economics-inline .computed-profit{border:1px solid rgba(123,230,201,.62);background:rgba(32,110,106,.48)}
 .economics-inline .auto-label{display:inline-block;margin-left:4px;color:#b7f2e2;font-size:9px;letter-spacing:.7px;font-weight:800}
 .profit-note{font-size:11px;line-height:1.5;color:#a9cecc;margin:-5px 0 18px}
+
+/* Calendar-month realized profit module */
+.start-month-hint{margin:7px 0 0;color:#a7cdca}
+.field input[type="month"]{color-scheme:dark;min-height:42px}
+.monthly-overview{margin:18px 0 20px;padding:25px;border:1px solid #dce9e6;background:#fff;border-radius:15px;box-shadow:0 4px 14px rgba(13,70,67,.035)}
+.monthly-heading{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:18px}
+.monthly-heading h3{margin:7px 0 5px;letter-spacing:-.6px;font-size:22px}
+.monthly-heading p{font-size:12px;color:#748b8c;max-width:525px;line-height:1.5;margin:0}
+.monthly-picker{min-width:180px;flex-shrink:0}
+.monthly-picker label{display:block;color:#62817e;font-size:11px;font-weight:750;margin-bottom:7px}
+.monthly-picker select{border:1px solid #c9dcd7;border-radius:9px;background:#f7fbfa;color:#173b3e;padding:11px 12px;width:100%;font-weight:650}
+.monthly-grid{display:grid;grid-template-columns:minmax(210px,1.35fr) repeat(3,minmax(125px,1fr));gap:10px}
+.monthly-primary{background:linear-gradient(120deg,#116961,#165b58);color:#fff;border-radius:12px;padding:20px;min-width:0}
+.monthly-secondary{background:#edf6f3;border-radius:12px;padding:20px 14px;min-width:0}
+.monthly-grid span{font-size:11px;font-weight:750;letter-spacing:.35px;display:block;color:#668d88}
+.monthly-primary span{color:#b8e8dd}
+.monthly-grid strong{display:block;font-size:clamp(19px,2vw,28px);font-variant-numeric:tabular-nums;letter-spacing:-.65px;margin:11px 0 13px;overflow-wrap:anywhere}
+.monthly-grid small{font-size:11px;color:#76958f;line-height:1.4;display:block}
+.monthly-primary small{color:#c2e7de}
+.month-warning{margin:15px 0 0;padding:10px 12px;border-radius:9px;background:#fff5e5;color:#7e5731;font-size:12px;line-height:1.5}
+.month-warning[hidden]{display:none}
+@media(max-width:1250px){.monthly-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.monthly-overview{padding:15px}.monthly-heading{align-items:stretch;flex-direction:column}.monthly-picker{width:100%;min-width:0}.monthly-grid{gap:8px}.monthly-primary,.monthly-secondary{padding:15px 11px}.monthly-grid strong{font-size:19px}}
