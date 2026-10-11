@@ -42,3 +42,49 @@ footer span{margin:0 6px;color:#1a9a80}
 
 /* Week inspector: exact dates inclusive of both endpoints. */
 .week-date-range{margin-top:7px;font-size:12px;font-weight:700;letter-spacing:.2px;color:#127968;white-space:nowrap;font-variant-numeric:tabular-nums;min-height:16px}
+
+/* Single-row forecast controls */
+.period-bar{
+  display:flex;
+  align-items:center;
+  flex-wrap:nowrap;
+  gap:20px;
+  overflow-x:auto;
+  scrollbar-width:thin;
+  -webkit-overflow-scrolling:touch;
+}
+.period-bar .period-control{
+  display:flex;
+  flex:0 0 auto;
+  align-items:center;
+  gap:10px;
+  min-height:42px;
+}
+.period-bar .period-control label{
+  display:inline;
+  margin:0;
+  white-space:nowrap;
+  font-size:12px;
+  line-height:1.2;
+}
+.period-bar .stepper,
+.period-bar .period-control select{
+  flex-shrink:0;
+}
+.period-bar .week-date-range{
+  display:inline-flex;
+  align-items:center;
+  margin:0;
+  min-height:0;
+  white-space:nowrap;
+  line-height:1.25;
+}
+.period-bar .model-chip{
+  flex-shrink:0;
+  white-space:nowrap;
+  margin-left:auto;
+}
+@media(max-width:850px){
+  .period-bar{gap:14px;}
+  .period-bar .period-control{gap:8px;}
+}
