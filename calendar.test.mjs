@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { DEFAULTS, simulate } from './model.mjs';
-import { parseMonth, summarizeCalendarMonths } from './calendar.mjs';
+import { parseMonth, summarizeCalendarMonths, getWeekDateRange } from './calendar.mjs';
 
 const close=(a,b)=>assert.ok(Math.abs(a-b)<1e-6,`Expected ${a} close to ${b}`);
 
@@ -65,4 +65,23 @@ test('zero payout in first seven days of a seven-day delay',()=>{
  const summary=summarizeCalendarMonths(days,'2026-10');
  assert.ok(days.slice(0,7).every(d=>d.withdrawn===0));
  assert.ok(summary[0].profitWithdrawn>0);
+});
+
+test('week dates start on business launch date and include 7 calendar days',()=>{
+ assert.equal(getWeekDateRange('2026-10',1).label,'01.10.26 – 07.10.26');
+ assert.equal(getWeekDateRange('2026-10',5).label,'29.10.26 – 04.11.26');
+ assert.equal(getWeekDateRange('2026-10',36).label,'03.06.27 – 09.06.27');
+ assert.equal(getWeekDateRange('2026-10',52).label,'23.09.27 – 29.09.27');
+});
+
+test('week date ranges cross leap day, month ends and year ends',()=>{
+ assert.equal(getWeekDateRange('2028-02',5).label,'29.02.28 – 06.03.28');
+ assert.equal(getWeekDateRange('2026-12',5).label,'29.12.26 – 04.01.27');
+ assert.equal(getWeekDateRange('2027-01',1).label,'01.01.27 – 07.01.27');
+});
+
+test('week date range inputs must be valid whole forecast weeks',()=>{
+ assert.throws(()=>getWeekDateRange('2026-10',0));
+ assert.throws(()=>getWeekDateRange('2026-10',3.5));
+ assert.throws(()=>getWeekDateRange('2026-13',1));
 });
