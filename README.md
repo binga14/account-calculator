@@ -1,40 +1,79 @@
 # Binga — Commerce Forecast
 
-A responsive, browser-only calculator for ecommerce sales, operating profit, working capital and cash withdrawals by week.
+A responsive static ecommerce working-capital calculator with an **actual day-by-day cash ledger** and weekly summaries. No backend, login, or external services.
 
-## Features
-- Choose any projected week (1–104 in the UI, up to 260 in the model).
-- Change product cost, ad spend, operating overhead, payment fees and reinvestment percentage.
-- Set your starting capital, protected cash buffer and expected sales-to-cash cycle.
-- Enable/disable recurring $ investments (e.g. $1,000 at Weeks 10, 20, 30, …).
-- Compare sales trajectory with or without capital injections.
-- Review the complete weekly breakdown including cumulative sales and cumulative withdrawals.
-- Download a CSV; settings persist locally in your browser.
-- Zero dependencies, backend, API keys, or user accounts.
-
-## Running
-
-Serve the directory through any static HTTP server:
+## Run locally
 
 ```sh
 python3 -m http.server 3000
+# Browse http://localhost:3000
 ```
 
-Then open http://localhost:3000. Deploy to Vercel as a **static website** with this folder as the root directory. There is no build step or output folder to configure.
+The application consists of `index.html`, `styles.css`, `app.js`, and `model.mjs`. Deploy the repository root as a static Vercel project with no build command or output directory. No runtime dependencies are needed.
 
-## Model
+Run the finance model tests with Node.js 20+:
 
-In each week, any new capital is added at the **start** of the week.
-
-```
-usable cash = starting working capital * (1 - reserve %)
-weekly sales = usable cash / (product % + advertising %) * 7 / cash-cycle-days
-net operating profit = weekly sales * (1 - product % - ads % - overhead % - fees %)
-reinvested = min(net operating profit, sales * reinvestment %)  [when profit >= 0]
-withdrawn = max(0, net operating profit - reinvested)
-end working capital = max(0, starting working capital + reinvested)
+```sh
+node --test
 ```
 
-Losses reduce working capital. Reinvestment cannot exceed operating profit, so after changing costs the model avoids treating nonexistent profit as cash. The cash buffer is **unused money**, not an allowance for monetary loss. All revenues are theoretical potential under constant demand and ad performance, not actual orders or guaranteed forecasts. Taxes, chargebacks, payment holds, ad learning, and inventory bottlenecks are not modeled.
+## Inputs
 
-Default assumptions reproduce the earlier discussed scenario: $1,000 starting cash, 33% COGS, 40% advertising, 4% overhead, 3% fees, 10% reinvestment, 10% buffer, 7-day cycle, $1,000 top-ups at weeks 10/20/30/40/50, 52-week horizon. Disable recurring investments to compare against the no-additional-capital scenario.
+- Starting working capital, payout delay in **whole calendar days**, and protected cash reserve.
+- Product/shipping, Meta advertising, overhead/staff, and gateway costs as **percentages of gross sales**.
+- Share of gross sales to **retain as working capital** when settled profit allows it. Remaining settled profit is withdrawn.
+- Optional new capital, starting in a chosen week and recurring every N weeks.
+- Forecast horizon and selected week. Inputs are saved in local browser storage.
+
+## Daily cash model
+
+The old `weeklySales = workingCapital / upfrontRate * 7 / payoutDays` shortcut has been **removed**.
+
+The simulator runs once per day, for 7 days in each displayed week:
+
+1. At the beginning of day 1 of any contribution week, inject the new personal capital.
+2. Pay any sale payouts due on that day. A sale on Day 1 with a 7-day delay settles **at the start of Day 8**; with a 5-day delay it settles **at the start of Day 6**.
+3. A payout brings back the sale revenue **minus payment gateway fees**. At the same time, subtract allocated overhead (e.g. tools and staff) and withdraw eligible profit. Only the rest is available to recycle.
+4. Set a planned daily **upfront spending** budget: `max(0, contributedCapital + settledRetainedProfit) × (1 − reserve%) / payoutDays`. Spend no more than the cash *actually available in the bank above the protected reserve*. This paces initial usable capital evenly over the first cash cycle and increases the pace when profits are realized.
+5. Gross order sales for that day equal `upfrontSpend / (product% + advertising%)`. The product and advertising portions are paid **today**, not again on payout.
+6. Schedule the associated payout for `day + payoutDays`. Until then, it is pending and **cannot be spent**.
+7. Book revenue and operating profit at the time of sale, but **reinvest or withdraw profit only on settlement**, not when the order is placed.
+
+For each settled order, operating profit equals:
+
+```text
+gross sale − product/shipping − ads − gateway fee − overhead
+```
+
+Retained profit is the smaller of (a) positive settled operating profit and (b) `reinvestment % × sale`. Any remaining positive profit is withdrawn. If the sale made a loss, no profit is withdrawn; the loss reduces working capital.
+
+**Working capital** on the dashboard is the *capital budget* (all owner investments plus settled retained profit/loss). **Cash in bank** is the spendable/held cash currently available. They differ because cash funding purchases is tied up waiting for payouts. The **pending payout** metric estimates incoming payment amounts after gateway fees; overhead and intended profit withdrawals still need to be deducted when those payouts settle.
+
+### Example with default assumptions
+
+```text
+Initial capital:     $1,000
+Protected reserve:     $100
+Initial usable cash:   $900
+Cash cycle:            7 days
+Daily ad + goods spend: $900 / 7 = $128.57 (days 1–7)
+Week 1 sales:          $900 / 0.73 = ~$1,233
+Day 1 first payout:    Day 8, not Day 7
+Profit withdrawn in Week 1: $0 (no payout has arrived)
+```
+
+With a 5-day payout delay, money from Day 1 can be reused on Day 6. This affects real cash availability, rather than applying a `7 / days` multiplier to an entire week.
+
+## Outputs
+
+- Selected-week sales and **actual settled profit withdrawn**.
+- Cumulative booked revenue, cumulative settled cash withdrawals.
+- Working capital budget, actual bank cash, unsettled payouts, and this week's payouts.
+- Weekly and daily cash-ledger tables, separate downloadable CSVs, and scenario chart with/without capital injections.
+- Rounded display figures; model internally uses floating-point dollars.
+
+## Limitations
+
+This is a **cash-flow capacity scenario, not a sales forecast**. It assumes immediate conversion at the given ROAS, proportional product/advertising spend, constant margins, and automatic daily pacing of spend. Payment holds, ad learning, demand limits, refunds, taxes, supplier invoice delays, chargebacks, currency conversion costs, and credit terms are not simulated. The 4% overhead is treated as a variable cost **paid upon settlement**; actual annual or fixed overhead needs separate modeling. A bank payout delay may differ by transaction, merchant, bank and weekends.
+
+Source: [binga14/account-calculator](https://github.com/binga14/account-calculator).
