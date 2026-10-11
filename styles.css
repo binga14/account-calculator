@@ -39,3 +39,6 @@ footer span{margin:0 6px;color:#1a9a80}
 .month-warning[hidden]{display:none}
 @media(max-width:1250px){.monthly-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.monthly-overview{padding:15px}.monthly-heading{align-items:stretch;flex-direction:column}.monthly-picker{width:100%;min-width:0}.monthly-grid{gap:8px}.monthly-primary,.monthly-secondary{padding:15px 11px}.monthly-grid strong{font-size:19px}}
+
+/* Week inspector: exact dates inclusive of both endpoints. */
+.week-date-range{margin-top:7px;font-size:12px;font-weight:700;letter-spacing:.2px;color:#127968;white-space:nowrap;font-variant-numeric:tabular-nums;min-height:16px}
